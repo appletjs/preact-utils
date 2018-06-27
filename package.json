@@ -1,0 +1,29 @@
+{
+  "name": "preact-utils",
+  "version": "1.0.0",
+  "description": "sdddsdcds",
+  "main": "index.js",
+  "module": "src/index.js",
+  "scripts": {
+    "build": "rollup -c"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/appletjs/preact-utils.git"
+  },
+  "keywords": [
+    "preact",
+    "utils",
+    "attributes",
+    "props"
+  ],
+  "author": "Maofeng Zhang <japplet@163.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/appletjs/preact-utils/issues"
+  },
+  "homepage": "https://github.com/appletjs/preact-utils#readme",
+  "devDependencies": {
+    "rollup": "^0.61.2"
+  }
+}
