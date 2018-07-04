@@ -1,6 +1,6 @@
-import {inWeex, inBrowser, isIOS} from './env';
-import {noop} from './shared';
-import {isNative} from './functions/is';
+import {inWeex, inBrowser, isIOS} from '../env';
+import {noop} from './noop';
+import {isNative} from './is';
 
 const callbacks = [];
 let pending = false;

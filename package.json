@@ -1,11 +1,12 @@
 {
   "name": "preact-utils",
-  "version": "1.0.0",
-  "description": "sdddsdcds",
+  "version": "1.1.0",
+  "description": "preact utils",
   "main": "index.js",
   "module": "src/index.js",
   "scripts": {
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
