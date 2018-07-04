@@ -12,7 +12,7 @@ Browser environment sniffing.
 - {boolean} inBrowser
 - {boolean} inWeex
 - {boolean} weexPlatform
-- {boolean} UA
+- {string} UA
 - {boolean} isIE
 - {boolean} isIE9
 - {boolean} isEdge
