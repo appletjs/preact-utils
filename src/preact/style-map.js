@@ -1,4 +1,4 @@
-const partSplitRE = /\s*;(\s*;)+?\s*/;
+const partSplitRE = /\s*;\s*/;
 const nvSplitRE = /\s*:\s*/;
 
 // 获取具有浏览器前缀的CSS属性
@@ -32,6 +32,7 @@ export class StyleMap {
     // prop:value;prop2:value2;...
     if (typeof data === 'string') {
       data.split(partSplitRE).forEach(function (part) {
+        if (!part.trim()) return;
         const [name, value] = part.split(nvSplitRE);
         name && value !== undefined && (map[name] = value);
       });
