@@ -5,9 +5,9 @@ import {isNative} from './is';
 const callbacks = [];
 let pending = false;
 
-function handleError(err, ctx, info) {
+function handleError(err) {
   if ((inBrowser || inWeex) && typeof console !=='undefined') {
-    err.message = `Error in ${info}: ${err.message}`;
+    err.message = `Error in nextTick: ${err.message}`;
     console.error(err);
   } else {
     throw err;
@@ -19,7 +19,12 @@ function flushCallbacks() {
   const copies = callbacks.slice(0);
   callbacks.length = 0;
   for (let i = 0; i < copies.length; i++) {
-    copies[i]();
+    const task = copies[i];
+    if (useMacroTask && task._withTask) {
+      task._withTask();
+    } else {
+      task();
+    }
   }
 }
 
@@ -109,8 +114,11 @@ export function nextTick(cb, ctx){
       try {
         cb.call(ctx);
       } catch (e) {
-        if (!handleError) throw e;
-        handleError(e, ctx, 'nextTick');
+        if (ctx && typeof ctx.handleError === 'function') {
+          ctx.handleError(e);
+        } else {
+          handleError(e);
+        }
       }
     } else if (_resolve) {
       _resolve(ctx);
