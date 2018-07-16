@@ -11,7 +11,7 @@ Browser environment sniffing.
 
 - {boolean} inBrowser
 - {boolean} inWeex
-- {boolean} weexPlatform
+- {string} weexPlatform
 - {string} UA
 - {boolean} isIE
 - {boolean} isIE9
@@ -91,7 +91,7 @@ Browser environment sniffing.
 #### 实例方法
 
 - constructor(data: string | any[] | Object);
-- add(...tokens: string[]): this;
+- add(...tokens: any[]): this;
 - contains(token: string): boolean;
 - item(index: number): string | null;
 - remove(...tokens: string[]): this;
@@ -99,11 +99,23 @@ Browser environment sniffing.
 - toString(): string;
 
 
-## 取消的方法
+## slot
 
-> 后续版本不建议使用。
+- parseSlots(children: any[]): Record<string, any[]>;
 
-- parseSlots(props: Object): Object;
+```jsx harmony
+
+<Container>
+  {/* slot: foo */}
+  <Card slot="foo">...</Card>
+  {/* slot: bar */}
+  <Card slot="bar">...</Card>
+  {/* slot: default */}
+  <span>html element</span>
+  <Card>component</Card>
+</Container>;
+
+```
 
 
 ## Todo List
