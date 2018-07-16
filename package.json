@@ -1,6 +1,6 @@
 {
   "name": "preact-utils",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "preact utils",
   "main": "index.js",
   "module": "src/index.js",
@@ -25,6 +25,8 @@
   },
   "homepage": "https://github.com/appletjs/preact-utils#readme",
   "devDependencies": {
-    "rollup": "^0.61.2"
+    "rollup": "^0.61.2",
+    "rollup-plugin-buble": "^0.19.2",
+    "rollup-plugin-uglify": "^4.0.0"
   }
 }

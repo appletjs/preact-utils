@@ -5,16 +5,16 @@
 }(this, (function (exports) { 'use strict';
 
   // Browser environment sniffing
-  const inBrowser = typeof window !== 'undefined';
-  const inWeex = typeof WXEnvironment !== 'undefined' && !!WXEnvironment.platform;
-  const weexPlatform = inWeex && WXEnvironment.platform.toLowerCase();
-  const UA = inBrowser && window.navigator.userAgent.toLowerCase();
-  const isIE = UA && /msie|trident/.test(UA);
-  const isIE9 = UA && UA.indexOf('msie 9.0') > 0;
-  const isEdge = UA && UA.indexOf('edge/') > 0;
-  const isAndroid = (UA && UA.indexOf('android') > 0) || (weexPlatform === 'android');
-  const isIOS = (UA && /iphone|ipad|ipod|ios/.test(UA)) || (weexPlatform === 'ios');
-  const isChrome = UA && /chrome\/\d+/.test(UA) && !isEdge;
+  var inBrowser = typeof window !== 'undefined';
+  var inWeex = typeof WXEnvironment !== 'undefined' && !!WXEnvironment.platform;
+  var weexPlatform = inWeex && WXEnvironment.platform.toLowerCase();
+  var UA = inBrowser && window.navigator.userAgent.toLowerCase();
+  var isIE = UA && /msie|trident/.test(UA);
+  var isIE9 = UA && UA.indexOf('msie 9.0') > 0;
+  var isEdge = UA && UA.indexOf('edge/') > 0;
+  var isAndroid = (UA && UA.indexOf('android') > 0) || (weexPlatform === 'android');
+  var isIOS = (UA && /iphone|ipad|ipod|ios/.test(UA)) || (weexPlatform === 'ios');
+  var isChrome = UA && /chrome\/\d+/.test(UA) && !isEdge;
 
   /**
    * Create a cached version of a pure function.
@@ -23,9 +23,9 @@
    * @return {function(string=): *}
    */
   function cached(fn) {
-    const cache = Object.create(null);
+    var cache = Object.create(null);
     return function hitHandle(str) {
-      const hit = cache[str];
+      var hit = cache[str];
       return hit || (cache[str] = fn(str));
     }
   }
@@ -33,7 +33,7 @@
   /**
    * Get the raw type string of a value e.g. [object Object]
    */
-  const _toString = Object.prototype.toString;
+  var _toString = Object.prototype.toString;
 
   function isUndefined(v) {
     return v === undefined || v === null;
@@ -112,7 +112,7 @@
    * @return {boolean}
    */
   function isValidArrayIndex(val) {
-    const n = parseFloat(String(val));
+    var n = parseFloat(String(val));
     return n >= 0 && Math.floor(n) === n && isFinite(val);
   }
 
@@ -138,7 +138,7 @@
    * @return {number|string}
    */
   function toNumber(val) {
-    const n = parseFloat(val);
+    var n = parseFloat(val);
     return isNaN(n) ? val : n;
   }
 
@@ -157,11 +157,13 @@
    * @param {string|RegExp} separator
    * @return {Object}
    */
-  function makeMap(str, separator = ',') {
-    const map = Object.create(null);
-    const list = str.split(separator);
+  function makeMap(str, separator) {
+    if ( separator === void 0 ) separator = ',';
 
-    for (let i = 0; i < list.length; i++) {
+    var map = Object.create(null);
+    var list = str.split(separator);
+
+    for (var i = 0; i < list.length; i++) {
       map[list[i]] = true;
     }
 
@@ -178,22 +180,22 @@
    * @return {function(*): boolean | undefined}
    */
   function makeMapAccessor(str, expectsLowerCase, separator) {
-    const map = makeMap(str, separator);
+    var map = makeMap(str, separator);
     return expectsLowerCase
-      ? val => map[val.toLowerCase()]
-      : val => map[val];
+      ? function (val) { return map[val.toLowerCase()]; }
+      : function (val) { return map[val]; };
   }
 
   function noop() {
     // nothing
   }
 
-  const callbacks = [];
-  let pending = false;
+  var callbacks = [];
+  var pending = false;
 
-  function handleError(err, ctx, info) {
+  function handleError(err) {
     if ((inBrowser || inWeex) && typeof console !=='undefined') {
-      err.message = `Error in ${info}: ${err.message}`;
+      err.message = "Error in nextTick: " + (err.message);
       console.error(err);
     } else {
       throw err;
@@ -202,10 +204,15 @@
 
   function flushCallbacks() {
     pending = false;
-    const copies = callbacks.slice(0);
+    var copies = callbacks.slice(0);
     callbacks.length = 0;
-    for (let i = 0; i < copies.length; i++) {
-      copies[i]();
+    for (var i = 0; i < copies.length; i++) {
+      var task = copies[i];
+      if (useMacroTask && task._withTask) {
+        task._withTask();
+      } else {
+        task();
+      }
     }
   }
 
@@ -217,9 +224,9 @@
   // when state is changed right before repaint (e.g. #6813, out-in transitions).
   // Here we use microtask by default, but expose a way to force (macro) task when
   // needed (e.g. in event handlers attached by v-on).
-  let microTimerFunc;
-  let macroTimerFunc;
-  let useMacroTask = false;
+  var microTimerFunc;
+  var macroTimerFunc;
+  var useMacroTask = false;
 
   // Determine (macro) task defer implementation.
   // Technically setImmediate should be the ideal choice, but it's only available
@@ -236,8 +243,8 @@
       MessageChannel.toString() === '[object MessageChannelConstructor]'
     )
   ) {
-    const channel = new MessageChannel();
-    const port = channel.port2;
+    var channel = new MessageChannel();
+    var port = channel.port2;
     channel.port1.onmessage = flushCallbacks;
     macroTimerFunc = function() {
       port.postMessage(1);
@@ -252,7 +259,7 @@
   // Determine microtask defer implementation.
   /* istanbul ignore next, $flow-disable-line */
   if (typeof Promise !== 'undefined' && isNative(Promise)) {
-    const p = Promise.resolve();
+    var p = Promise.resolve();
     microTimerFunc = function() {
       p.then(flushCallbacks);
       // in problematic UIWebViews, Promise.then doesn't completely break, but
@@ -260,7 +267,7 @@
       // microtask queue but the queue isn't being flushed, until the browser
       // needs to do some other work, e.g. handle a timer. Therefore we can
       // "force" the microtask queue to be flushed by adding an empty timer.
-      if (isIOS) setTimeout(noop);
+      if (isIOS) { setTimeout(noop); }
     };
   } else {
     // fallback to macro
@@ -277,7 +284,7 @@
   function withMacroTask(fn) {
     return fn._withTask || (fn._withTask = function () {
       useMacroTask = true;
-      const res = fn.apply(null, arguments);
+      var res = fn.apply(null, arguments);
       useMacroTask = false;
       return res;
     });
@@ -288,15 +295,18 @@
    * @param {Object} [ctx]
    */
   function nextTick(cb, ctx){
-    let _resolve;
+    var _resolve;
 
     callbacks.push(function() {
       if (cb) {
         try {
           cb.call(ctx);
         } catch (e) {
-          if (!handleError) throw e;
-          handleError(e, ctx, 'nextTick');
+          if (ctx && typeof ctx.handleError === 'function') {
+            ctx.handleError(e);
+          } else {
+            handleError(e);
+          }
         }
       } else if (_resolve) {
         _resolve(ctx);
@@ -314,7 +324,7 @@
     }
 
     if (!cb && typeof Promise !== 'undefined') {
-      return new Promise(resolve => {
+      return new Promise(function (resolve) {
         _resolve = resolve;
       });
     }
@@ -327,8 +337,8 @@
    * @return {Function}
    */
   function once(fn) {
-    let called = false;
-    let result;
+    var called = false;
+    var result;
 
     return function () {
       if (!called) {
@@ -340,26 +350,12 @@
     };
   }
 
-  function parseSlots(props) {
-    const slots = {};
-
-    props.children.forEach(function (child, i) {
-      if (child == null) return;
-      const name = (child.attributes || {}).slot;
-      if (!name) return;
-      props.children[i] = undefined;
-      (slots[name] || (slots[name] = [])).push(child);
-    });
-
-    return slots;
-  }
-
-  const hasOwn = Object.prototype.hasOwnProperty;
+  var hasOwn = Object.prototype.hasOwnProperty;
 
   function without(obj, exclude) {
-    const target = {};
+    var target = {};
 
-    for (const k in obj) {
+    for (var k in obj) {
       if (hasOwn.call(obj, k) && exclude.indexOf(k) === -1) {
         target[k] = obj[k];
       }
@@ -371,12 +367,12 @@
   // 对”\””、”&”、”‘“、”<”、”>”、空格(0x20)、0x00到0x20、0x7F-0xFF
   // 以及0x0100-0x2700的字符进行转义，基本上就覆盖的比较全面了。
   // https://www.cnblogs.com/daysme/p/7100553.html
-  const HTML_ENCODE_RE = /"|&|'|<|>|[\x00-\x20]|[\x7F-\xFF]|[\u0100-\u2700]/g;
+  var HTML_ENCODE_RE = /"|&|'|<|>|[\x00-\x20]|[\x7F-\xFF]|[\u0100-\u2700]/g;
 
   function encodeHTML(str) {
     return String(str).replace(HTML_ENCODE_RE, function ($0) {
-      let c = $0.charCodeAt(0);
-      let r = ['&#'];
+      var c = $0.charCodeAt(0);
+      var r = ['&#'];
       c = (c === 0x20) ? 0xA0 : c;
       r.push(c);
       r.push(';');
@@ -384,15 +380,30 @@
     });
   }
 
-  const partSplitRE = /\s*;\s*/;
-  const nvSplitRE = /\s*:\s*/;
+  function parseSlots(children) {
+    var slots = {};
+
+    if (Array.isArray(children)) {
+      children.forEach(function (child) {
+        if (child == null) { return; }
+        var attrs = child.attributes;
+        var name = attrs && attrs.slot || 'default';
+        (slots[name] || (slots[name] = [])).push(child);
+      });
+    }
+
+    return slots;
+  }
+
+  var partSplitRE = /\s*;\s*/;
+  var nvSplitRE = /\s*:\s*/;
 
   // 获取具有浏览器前缀的CSS属性
-  const prefixedCssProperties = function (map) {
-    const styles = window.getComputedStyle(document.documentElement, '');
+  var prefixedCssProperties = function (map) {
+    var styles = window.getComputedStyle(document.documentElement, '');
     [].slice.call(styles).filter(function (x) {
-      const matches = x.match(/-(webkit|moz|ms|o)-/);
-      if (matches) map[x.slice(matches[0].length)] = x;
+      var matches = x.match(/-(webkit|moz|ms|o)-/);
+      if (matches) { map[x.slice(matches[0].length)] = x; }
     });
     return map;
   }({});
@@ -401,86 +412,97 @@
     return prefixedCssProperties[name] || name;
   }
 
-  class StyleMap {
-    static from(data) {
-      const style = new StyleMap();
-      style.dict = this.explode(data);
-      return style;
+  var StyleMap = function StyleMap() {
+    this.dict = Object.create(null);
+  };
+
+  var prototypeAccessors = { size: { configurable: true } };
+
+  StyleMap.from = function from (data) {
+    var style = new StyleMap();
+    style.dict = this.explode(data);
+    return style;
+  };
+
+  StyleMap.explode = function explode (data) {
+    if (data instanceof StyleMap) {
+      return Object.assign({}, data.dict);
     }
 
-    static explode(data) {
-      if (data instanceof StyleMap) {
-        return Object.assign({}, data.dict);
-      }
+    var map = Object.create(null);
 
-      const map = Object.create(null);
-
-      // prop:value;prop2:value2;...
-      if (typeof data === 'string') {
-        data.split(partSplitRE).forEach(function (part) {
-          if (!part.trim()) return;
-          const [name, value] = part.split(nvSplitRE);
-          name && value !== undefined && (map[name] = value);
-        });
-      }
-      // ['name:value', [name, value]...]
-      else if (Array.isArray(data)) {
-        data.forEach(function (part) {
-          if (typeof part === 'string') part = part.split(nvSplitRE);
-          if (!Array.isArray(part)) return;
-          const [name, value] = part;
-          name && value !== undefined && (map[name] = value);
-        });
-      }
-      // {name: value, ...}
-      else if (data && typeof data === 'object') {
-        Object.keys(data).forEach(function (key) {
-          data[key] !== undefined && (map[key] = data[key]);
-        });
-      }
-
-      return map;
+    // prop:value;prop2:value2;...
+    if (typeof data === 'string') {
+      data.split(partSplitRE).forEach(function (part) {
+        if (!part.trim()) { return; }
+        var ref = part.split(nvSplitRE);
+          var name = ref[0];
+          var value = ref[1];
+        name && value !== undefined && (map[name] = value);
+      });
+    }
+    // ['name:value', [name, value]...]
+    else if (Array.isArray(data)) {
+      data.forEach(function (part) {
+        if (typeof part === 'string') { part = part.split(nvSplitRE); }
+        if (!Array.isArray(part)) { return; }
+        var name = part[0];
+          var value = part[1];
+        name && value !== undefined && (map[name] = value);
+      });
+    }
+    // {name: value, ...}
+    else if (data && typeof data === 'object') {
+      Object.keys(data).forEach(function (key) {
+        data[key] !== undefined && (map[key] = data[key]);
+      });
     }
 
-    get size() {
-      return Object.keys(this.dict).length;
-    }
+    return map;
+  };
 
-    constructor() {
-      this.dict = Object.create(null);
-    }
+  prototypeAccessors.size.get = function () {
+    return Object.keys(this.dict).length;
+  };
 
-    append(name, value) {
-      this.set(name, (this.has(name) ? this.get(name) + ',' : '') + value);
-    }
+  StyleMap.prototype.append = function append (name, value) {
+    this.set(name, (this.has(name) ? this.get(name) + ',' : '') + value);
+    return this;
+  };
 
-    get(name) {
-      return this.dict[property(name)];
-    }
+  StyleMap.prototype.get = function get (name) {
+    return this.dict[property(name)];
+  };
 
-    has(name) {
-      return property(name) in this.dict;
-    }
+  StyleMap.prototype.has = function has (name) {
+    return property(name) in this.dict;
+  };
 
-    remove(name) {
-      return delete this.dict[property(name)];
-    }
+  StyleMap.prototype.remove = function remove (name) {
+    return delete this.dict[property(name)];
+  };
 
-    set(name, value) {
-      this.dict[property(name)] = value;
-      return this;
-    }
+  StyleMap.prototype.set = function set (name, value) {
+    this.dict[property(name)] = value;
+    return this;
+  };
 
-    toString() {
-      const styles = [];
-      for (const key in this.dict) styles.push(key + ':' + this.dict[key]);
-      return styles.join(';') + (this.size ? ';' : '');
-    }
-  }
+  StyleMap.prototype.toString = function toString () {
+      var this$1 = this;
+
+    var styles = [];
+    for (var key in this$1.dict) { styles.push(key + ':' + this$1.dict[key]); }
+    return styles.join(';') + (this.size ? ';' : '');
+  };
+
+  Object.defineProperties( StyleMap.prototype, prototypeAccessors );
 
   StyleMap.property = property;
 
-  const {indexOf, splice, join} = [];
+  var ref = [];
+  var indexOf = ref.indexOf;
+  var splice = ref.splice;
+  var join = ref.join;
 
   /**
    * 模拟 DOMTokenList 接口，主要用于组件的 class 管理，
@@ -492,159 +514,160 @@
    *
    * @link https://developer.mozilla.org/zh-CN/docs/Web/API/DOMTokenList
    */
-  class TokenList {
+  var TokenList = function TokenList() {
+    this.length = 0;
+  };
 
-    /**
-     * @param {*} data
-     * @return {TokenList}
-     */
-    static from(data) {
-      const list = new TokenList();
-      const parsed = this.explode(data);
-      parsed.forEach(t => list.add(t));
-      return list;
+  /**
+   * @param {any[]} tokens
+   * @return {TokenList}
+   */
+  TokenList.from = function from (data) {
+    var list = new TokenList();
+    var parsed = this.explode(data);
+    parsed.forEach(function (t) { return list.add(t); });
+    return list;
+  };
+
+  /**
+   * @param {*} value
+   * @return {string[]}
+   */
+  TokenList.explode = function explode (value) {
+    var parsed = [];
+
+    if (value instanceof TokenList) {
+      return [].concat( value );
     }
 
-    /**
-     * @param {*} value
-     * @return {string[]}
-     */
-    static explode(value) {
-      let parsed = [];
+    switch (typeof value) {
+      // 'class1'
+      // 'class1 class2'
+      case 'string':
+        parsed = value.trim().split(/\s+/);
+        break;
 
-      if (value instanceof TokenList) {
-        return [...value];
-      }
+      // arg = () => 'class';
+      // arg = () => 'class1 class2';
+      // arg = () => ['class1', 'class2'];
+      // arg = () => {'class1': true, 'class2': check};
+      // arg = () => [{'class1': true}, 'selected', [...]];
+      case 'function':
+        try {
+          var values = value();
+          if (!values) { break; }
+          parsed = this.explode(values);
+        } catch (e) {
+        }
+        break;
 
-      switch (typeof value) {
-        // 'class1'
-        // 'class1 class2'
-        case 'string':
-          parsed = value.trim().split(/\s+/);
+      // array, object, null
+      case 'object':
+        if (value == null) {
+          break;
+        }
+
+        // ['class1', ...]
+        // ['class1', {...}]
+        if (Array.isArray(value)) {
+          parsed = value
+            .map(this.explode, this)
+            .reduce(function (x, a) { return x.concat(a); }, []);
           break;
 
-        // arg = () => 'class';
-        // arg = () => 'class1 class2';
-        // arg = () => ['class1', 'class2'];
-        // arg = () => {'class1': true, 'class2': check};
-        // arg = () => [{'class1': true}, 'selected', [...]];
-        case 'function':
-          try {
-            const values = value();
-            if (!values) break;
-            parsed = this.explode(values);
-          } catch (e) {
+        }
+
+        // {className: check, ...}
+        parsed = Object.keys(value)
+          .map(function (key) { return value[key] && key; });
+
+    }
+
+    if (parsed.length) {
+      return parsed
+        .map(function (c) { return c.trim(); })
+        .filter(Boolean)
+        .filter(function check(className) {
+          if (!/^[a-zA-Z$_-][\w$_-]*$/.test(className)) {
+            console.warn(("Bad className \"" + className + "\""));
+            return false;
           }
-          break;
-
-        // array, object, null
-        case 'object':
-          if (value == null) {
-            break;
-          }
-
-          // ['class1', ...]
-          // ['class1', {...}]
-          if (Array.isArray(value)) {
-            parsed = value
-              .map(this.explode, this)
-              .reduce((x, a) => x.concat(a), []);
-            break;
-
-          }
-
-          // {className: check, ...}
-          parsed = Object.keys(value)
-            .map(key => value[key] && key);
-
-      }
-
-      if (parsed.length) {
-        return parsed
-          .map(c => c.trim())
-          .filter(Boolean)
-          .filter(function check(className) {
-            if (!/^[a-zA-Z$_-][\w$_-]*$/.test(className)) {
-              console.warn(`Bad className "${className}"`);
-              return false;
-            }
-            return true;
-          });
-      }
-
-      return parsed;
+          return true;
+        });
     }
 
-    constructor() {
-      this.length = 0;
-    }
+    return parsed;
+  };
 
-    /**
-     * @param {string[]} tokens
-     * @return {TokenList}
-     */
-    add(...tokens) {
-      tokens.forEach(token => {
-        if (token == null) return;
-        if (this.contains(token)) return;
-        this[this.length++] = token;
-      });
-      return this;
-    }
+  TokenList.prototype.add = function add () {
+      var this$1 = this;
+      var tokens = [], len = arguments.length;
+      while ( len-- ) tokens[ len ] = arguments[ len ];
 
-    /**
-     * @param {*} token
-     * @return {boolean}
-     */
-    contains(token) {
-      return indexOf.call(this, token) > -1;
-    }
+    TokenList.explode(tokens).forEach(function (token) {
+      if (token == null) { return; }
+      if (this$1.contains(token)) { return; }
+      this$1[this$1.length++] = token;
+    });
+    return this;
+  };
 
-    item(index) {
-      if (index < 0) index += this.length;
-      if (index >= this.length) return null;
-      return index < 0 ? null : this[index];
-    }
+  /**
+   * @param {*} token
+   * @return {boolean}
+   */
+  TokenList.prototype.contains = function contains (token) {
+    return indexOf.call(this, token) > -1;
+  };
 
-    /**
-     * @param {*[]} tokens
-     */
-    remove(...tokens) {
-      tokens.forEach(token => {
-        const index = indexOf.call(this, token);
-        if (index > -1) splice.call(this, index, 1);
-      });
-    }
+  TokenList.prototype.item = function item (index) {
+    if (index < 0) { index += this.length; }
+    if (index >= this.length) { return null; }
+    return index < 0 ? null : this[index];
+  };
 
-    /**
-     * 从 TokenList 字符串中移除符号字串（token），并返回 false。
-     * 如果传入的符号字串（token）不存在，则将其添加进去，并返回 true
-     *
-     * @param {string} token
-     * @return {boolean}
-     */
-    toggle(token) {
-      const has = this.contains(token);
-      this[has ? 'remove' : 'add'](token);
-      return has;
-    }
+  /**
+   * @param {*[]} tokens
+   */
+  TokenList.prototype.remove = function remove () {
+      var this$1 = this;
+      var tokens = [], len = arguments.length;
+      while ( len-- ) tokens[ len ] = arguments[ len ];
 
-    /**
-     * @return {string}
-     */
-    toString() {
-      return join.call(this, ' ');
-    }
-  }
+    tokens.forEach(function (token) {
+      var index = indexOf.call(this$1, token);
+      if (index > -1) { splice.call(this$1, index, 1); }
+    });
+  };
 
-  const camelizeRE = /-(\w)/g;
+  /**
+   * 从 TokenList 字符串中移除符号字串（token），并返回 false。
+   * 如果传入的符号字串（token）不存在，则将其添加进去，并返回 true
+   *
+   * @param {string} token
+   * @return {boolean}
+   */
+  TokenList.prototype.toggle = function toggle (token) {
+    var has = this.contains(token);
+    this[has ? 'remove' : 'add'](token);
+    return has;
+  };
+
+  /**
+   * @return {string}
+   */
+  TokenList.prototype.toString = function toString () {
+    return join.call(this, ' ');
+  };
+
+  var camelizeRE = /-(\w)/g;
 
   /**
    * Camelize a hyphen-delimited string.
    * @type {function(string=): string}
    */
-  const camelize = cached(function (str) {
-    return str.replace(camelizeRE, (_, c) => c ? c.toUpperCase() : '');
+  var camelize = cached(function (str) {
+    return str.replace(camelizeRE, function (_, c) { return c ? c.toUpperCase() : ''; });
   });
 
   /**
@@ -652,18 +675,18 @@
    *
    * @type {function(string=): string}
    */
-  const capitalize = cached(function (str) {
+  var capitalize = cached(function (str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
   });
 
-  const hyphenateRE = /\B([A-Z])/g;
+  var hyphenateRE = /\B([A-Z])/g;
 
   /**
    * Hyphenate a camelCase string.
    *
    * @type {function(string=): string}
    */
-  const hyphenate = cached(function (str) {
+  var hyphenate = cached(function (str) {
     return str.replace(hyphenateRE, '-$1').toLowerCase();
   });
 
@@ -698,9 +721,9 @@
   exports.nextTick = nextTick;
   exports.noop = noop;
   exports.once = once;
-  exports.parseSlots = parseSlots;
   exports.without = without;
   exports.encodeHTML = encodeHTML;
+  exports.parseSlots = parseSlots;
   exports.StyleMap = StyleMap;
   exports.TokenList = TokenList;
   exports.camelize = camelize;
@@ -710,3 +733,4 @@
   Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
+//# sourceMappingURL=index.js.map

@@ -6,10 +6,10 @@ export * from './functions/make-map';
 export * from './functions/next-tick';
 export * from './functions/noop';
 export * from './functions/once';
-export * from './functions/slot';
 export * from './functions/without';
 
 export * from './preact/html';
+export * from './preact/slots';
 export * from './preact/style-map';
 export * from './preact/token-list';
 
