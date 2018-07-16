@@ -98,11 +98,11 @@ export class TokenList {
   }
 
   /**
-   * @param {string[]} tokens
+   * @param {any[]} tokens
    * @return {TokenList}
    */
   add(...tokens) {
-    tokens.forEach(token => {
+    TokenList.explode(tokens).forEach(token => {
       if (token == null) return;
       if (this.contains(token)) return;
       this[this.length++] = token;
