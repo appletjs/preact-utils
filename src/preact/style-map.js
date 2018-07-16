@@ -66,6 +66,7 @@ export class StyleMap {
 
   append(name, value) {
     this.set(name, (this.has(name) ? this.get(name) + ',' : '') + value);
+    return this;
   }
 
   get(name) {
